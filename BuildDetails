@@ -1,0 +1,5 @@
+Android id - com.dhruv7393.ToDoApp
+
+Use https://expo.dev/login
+
+CMD -eas build --platform android
