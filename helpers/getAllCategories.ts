@@ -18,7 +18,7 @@ const getAllCategories = async (): Promise<ApiResponse> => {
     );
 
     return {
-      data: response.data,
+      data: response.data.data,
       error: undefined,
     };
   } catch (error) {
