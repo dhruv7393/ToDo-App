@@ -18,6 +18,7 @@ export default function TodayScreen() {
 
   const fetchCategories = async () => {
     const result = await getAllCategories();
+    console.log("Fetched categories:", result);
 
     const { data = [], error } = result;
 

@@ -13,10 +13,12 @@ interface ApiResponse {
 
 const getAllCategories = async (): Promise<ApiResponse> => {
   try {
-    const response = await axios.get("http://localhost:3001/vaccation");
+    const response = await axios.get(
+      "https://main.dgsooy6yeh5ar.amplifyapp.com/api/vaccation/"
+    );
 
     return {
-      data: response.data.data,
+      data: response.data,
       error: undefined,
     };
   } catch (error) {

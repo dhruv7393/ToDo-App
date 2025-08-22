@@ -1,8 +1,5 @@
 import axios, { isAxiosError } from "axios";
-import {
-  getModifiedCategories,
-  updateCategoryPriority,
-} from "todolibformobileapp";
+import { getModifiedCategories, updateCategoryPriority } from "dhruvtodo";
 import { CategoryData } from "./getAllCategories";
 
 interface ApiResponse {
@@ -17,14 +14,17 @@ const updateCategoryPriorityAPI = async (
 ): Promise<ApiResponse> => {
   try {
     const dataCopy = JSON.parse(JSON.stringify(data)); // Create a deep copy of the data
-    // Use updateCategoryPriority from todolibformobileapp
+    // Use updateCategoryPriority from dhruvtodo
     const updatedData = updateCategoryPriority(dataCopy, _id, newPriority);
 
     // Get modified categories data
     const modifiedCategories = getModifiedCategories(data, updatedData);
 
     // Send the modified data to the API using PATCH
-    await axios.patch("http://localhost:3001/vaccation", modifiedCategories);
+    await axios.patch(
+      "https://main.dgsooy6yeh5ar.amplifyapp.com/api/vaccation/",
+      modifiedCategories
+    );
 
     // Return the data from updateCategoryPriority on success
     return {
