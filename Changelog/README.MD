@@ -1,3 +1,7 @@
+#1.0.3 -
+
+- Adding images and notes for vision
+
 #1.0.2 -
 
 - Removing unused tabs
