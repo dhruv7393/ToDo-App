@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Platform, Text, TouchableOpacity, View } from "react-native";
+import { Animated, Platform, TouchableOpacity, View } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -65,31 +65,26 @@ export default function TabLayout() {
         style={{
           position: "absolute",
           bottom: 10, // 10px from bottom
-          left: 30, // 10px from left
-          right: 30, // 10px from right
+          left: "50%", // Center horizontally
+          transform: [{ translateX: -50 }], // Offset by half width to center
           backgroundColor: "#eab676", // Custom background color
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
           borderRadius: 20, // Rounded corners
           height: Platform.select({
-            ios: 90,
-            default: 70,
+            ios: 60,
+            default: 50,
           }),
           flexDirection: "row",
           alignItems: "center",
-          justifyContent: "space-around",
+          justifyContent: "center",
           opacity: tabBarOpacity,
+          paddingHorizontal: 20,
         }}
       >
         {state.routes.map((route: any, index: number) => {
           const { options } = descriptors[route.key];
-          const label =
-            options.tabBarLabel !== undefined
-              ? options.tabBarLabel
-              : options.title !== undefined
-              ? options.title
-              : route.name;
 
           const isFocused = state.index === index;
 
@@ -117,24 +112,14 @@ export default function TabLayout() {
               key={route.key}
               onPress={onPress}
               style={{
-                flex: 1,
                 alignItems: "center",
                 justifyContent: "center",
+                paddingHorizontal: 15,
                 paddingVertical: 8,
               }}
             >
               {options.tabBarIcon &&
-                options.tabBarIcon({ color, focused: isFocused, size: 24 })}
-              <Text
-                style={{
-                  color,
-                  fontSize: 10,
-                  fontWeight: isFocused ? "600" : "400",
-                  marginTop: 2,
-                }}
-              >
-                {label}
-              </Text>
+                options.tabBarIcon({ color, focused: isFocused, size: 28 })}
             </TouchableOpacity>
           );
         })}
@@ -173,27 +158,18 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: "Home",
-            tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="house.fill" color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="today"
-          options={{
             title: "Today",
             tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="calendar" color={color} />
+              <IconSymbol size={28} name="list.bullet" color={color} />
             ),
           }}
         />
         <Tabs.Screen
-          name="explore"
+          name="vision"
           options={{
-            title: "Explore",
+            title: "Vision",
             tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="paperplane.fill" color={color} />
+              <IconSymbol size={28} name="eye.fill" color={color} />
             ),
           }}
         />

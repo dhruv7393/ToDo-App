@@ -1,3 +1,8 @@
+#1.0.2 -
+
+- Removing unused tabs
+- Adding vision
+
 #1.0.1 -
 
 - Fixing api to get all categories as per backend modification

@@ -1,75 +1,144 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { ThemedText } from "@/components/ThemedText";
+import getAllCategories, { CategoryData } from "@/helpers/getAllCategories";
+import React, { useEffect } from "react";
+import {
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+export default function TodayScreen() {
+  const [categories, setCategories] = React.useState<CategoryData[]>([]);
+  const [error, setError] = React.useState<string | null>(null);
 
-export default function HomeScreen() {
+  const fetchCategories = async () => {
+    const result = await getAllCategories();
+
+    const { data = [], error } = result;
+
+    if (error) {
+      setError(error);
+      // Handle error
+    } else {
+      setCategories(data);
+      // Process categories as needed
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <ImageBackground
+      source={require("@/assets/images/Nishan.jpeg")}
+      style={styles.container}
+      resizeMode="stretch"
+      imageStyle={styles.backgroundImage}
+    >
+      <View style={styles.overlay}>
+        <View style={styles.content}>
+          <ScrollView
+            contentContainerStyle={styles.categoriesContainer}
+            showsVerticalScrollIndicator={false}
+            style={styles.scrollView}
+          >
+            {error ? (
+              <ThemedText type="default" style={styles.errorMessage}>
+                {error}
+              </ThemedText>
+            ) : categories.length > 0 ? (
+              categories.map((category, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.categoryBox}
+                  activeOpacity={0.7}
+                >
+                  <ThemedText type="default" style={styles.categoryText}>
+                    {category.name}
+                  </ThemedText>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <ThemedText type="default" style={styles.message}>
+                Loading categories...
+              </ThemedText>
+            )}
+          </ScrollView>
+        </View>
+      </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  backgroundImage: {
+    width: "100%",
+    height: "100%",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.4)", // Darker semi-transparent overlay for better text readability
+    paddingTop: 30, // Add 30px top padding
+  },
+  content: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    minHeight: "100%", // Ensure content takes full height for centering
+  },
+  title: {
+    marginBottom: 20,
+    textAlign: "center",
+    color: "white",
+    fontWeight: "bold",
+  },
+  scrollView: {
+    width: "100%",
+    flexGrow: 1, // Allow scroll view to grow
+  },
+  categoriesContainer: {
+    width: "100%",
+    paddingHorizontal: 0,
+    paddingBottom: 20, // Reduced padding since tab bar is auto-hiding
+    justifyContent: "center", // Center content vertically within scroll view
+    flexGrow: 1, // Allow container to grow to center content
+  },
+  categoryBox: {
+    backgroundColor: "transparent",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginVertical: 5,
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.8)",
+    width: "100%",
+  },
+  categoryText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "500",
+    textAlign: "center",
+  },
+  errorMessage: {
+    textAlign: "center",
+    fontSize: 16,
+    color: "#ff6b6b",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    padding: 10,
+    borderRadius: 10,
+  },
+  message: {
+    textAlign: "center",
+    fontSize: 16,
+    opacity: 0.9,
+    color: "white",
   },
 });
