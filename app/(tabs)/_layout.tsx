@@ -64,7 +64,7 @@ export default function TabLayout() {
       <Animated.View
         style={{
           position: "absolute",
-          bottom: 10, // 10px from bottom
+          bottom: 30, // 30px from bottom to ensure 20px clear space
           left: "50%", // Center horizontally
           transform: [{ translateX: -50 }], // Offset by half width to center
           backgroundColor: "#eab676", // Custom background color
@@ -131,10 +131,10 @@ export default function TabLayout() {
     <TouchableOpacity
       style={{
         position: "absolute",
-        bottom: 0,
+        bottom: 20, // Start 20px from bottom to leave clear space
         left: 0,
         right: 0,
-        height: 100, // Touch area height
+        height: 80, // Touch area height (reduced from 100)
         backgroundColor: "transparent",
         zIndex: isTabBarVisible ? -1 : 1000, // Lower z-index when tab bar is visible
       }}

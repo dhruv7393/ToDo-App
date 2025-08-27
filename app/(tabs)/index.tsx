@@ -1,5 +1,7 @@
+import TaskDetails from "@/components/TaskDetails";
 import { ThemedText } from "@/components/ThemedText";
 import getAllCategories, { CategoryData } from "@/helpers/getAllCategories";
+import updateVaccation from "@/helpers/updateVaccation";
 import React, { useEffect } from "react";
 import {
   ImageBackground,
@@ -12,6 +14,10 @@ import {
 export default function TodayScreen() {
   const [categories, setCategories] = React.useState<CategoryData[]>([]);
   const [error, setError] = React.useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = React.useState<any>(null);
+  const [selectedCategoryId, setSelectedCategoryId] =
+    React.useState<string>("");
+  const [showTaskDetails, setShowTaskDetails] = React.useState(false);
 
   const fetchCategories = async () => {
     const result = await getAllCategories();
@@ -27,9 +33,48 @@ export default function TodayScreen() {
     }
   };
 
+  const handleTaskClick = (task: any, categoryId: string) => {
+    setSelectedTask(task);
+    setSelectedCategoryId(categoryId);
+    setShowTaskDetails(true);
+  };
+
+  const handleBackToCategories = () => {
+    setShowTaskDetails(false);
+    setSelectedTask(null);
+    setSelectedCategoryId("");
+  };
+
+  const handleCategoriesUpdate = async (
+    modifiedCategories: CategoryData[],
+    updatedCategories: CategoryData[]
+  ) => {
+    try {
+      const response = await updateVaccation(modifiedCategories);
+      setCategories(updatedCategories);
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Error updating vacation"
+      );
+    }
+  };
+
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  if (showTaskDetails && selectedTask) {
+    return (
+      <TaskDetails
+        task={selectedTask}
+        onBack={handleBackToCategories}
+        categories={categories}
+        categoryId={selectedCategoryId}
+        onCategoriesUpdate={handleCategoriesUpdate}
+      />
+    );
+  }
+
   return (
     <ImageBackground
       source={require("@/assets/images/Nishan.jpeg")}
@@ -56,8 +101,33 @@ export default function TodayScreen() {
                   activeOpacity={0.7}
                 >
                   <ThemedText type="default" style={styles.categoryText}>
-                    {category.name}
+                    {category.isMarkedDone ? (
+                      <del>{category.name}</del>
+                    ) : (
+                      category.name
+                    )}
                   </ThemedText>
+                  {category.tasks.length > 0 && (
+                    <View style={styles.tasksContainer}>
+                      {category.tasks.map((task: any) => (
+                        <TouchableOpacity
+                          key={task._id}
+                          style={styles.taskItem}
+                          onPress={() => handleTaskClick(task, category._id)}
+                          activeOpacity={0.7}
+                        >
+                          <ThemedText type="default" style={styles.taskText}>
+                            - {task.done ? <del>{task.name}</del> : task.name}
+                          </ThemedText>
+                          {task.notes && task.notes !== "" && (
+                            <ThemedText type="default" style={styles.taskNotes}>
+                              {task.notes}
+                            </ThemedText>
+                          )}
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
                 </TouchableOpacity>
               ))
             ) : (
@@ -125,7 +195,8 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "500",
-    textAlign: "center",
+    textAlign: "left",
+    paddingLeft: 10,
   },
   errorMessage: {
     textAlign: "center",
@@ -140,5 +211,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     opacity: 0.9,
     color: "white",
+  },
+  tasksContainer: {
+    marginTop: 8,
+    paddingLeft: 10,
+  },
+  taskText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "500",
+    textAlign: "left",
+    paddingLeft: 10,
+    marginVertical: 2,
+  },
+  taskItem: {
+    marginVertical: 4,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+  },
+  taskNotes: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 12,
+    fontWeight: "300",
+    textAlign: "left",
+    paddingLeft: 25,
+    marginTop: 2,
+    fontStyle: "italic",
   },
 });

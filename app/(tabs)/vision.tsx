@@ -18,6 +18,7 @@ const visionTexts = [
   "Tane, mane, dhane, atmae, antar, kaame, family ane friends thi sukhi thavai",
   "Family Photos",
   "Friends Photos",
+  "Home pics",
   "50 Acer nu farmland",
 ];
 
@@ -63,7 +64,7 @@ const visionImages = [
     name: "Warren",
     source: require("../../assets/vision/warren.jpeg"),
     height: 250,
-    notes: ["Financially independent - 1.5M 22%PF/A"],
+    notes: ["Financially independent - 1.5M 750K Investment 22%PF/A"],
   },
   {
     id: "6",
@@ -81,6 +82,24 @@ const visionImages = [
     id: "8",
     name: "007 Looks",
     source: require("../../assets/vision/007 Looks.jpeg"),
+    height: 210,
+  },
+  {
+    id: "7",
+    name: "Farm1",
+    source: require("../../assets/vision/Farm1.jpeg"),
+    height: 240,
+  },
+  {
+    id: "8",
+    name: "Farm2",
+    source: require("../../assets/vision/Farm2.jpeg"),
+    height: 210,
+  },
+  {
+    id: "8",
+    name: "Farm3",
+    source: require("../../assets/vision/Farm3.jpeg"),
     height: 210,
   },
   {

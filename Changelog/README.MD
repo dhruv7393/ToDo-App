@@ -1,3 +1,7 @@
+#1.0.4 -
+
+- Adding ability and screen to delete, update , mark task as done or not done
+
 #1.0.3 -
 
 - Adding images and notes for vision
