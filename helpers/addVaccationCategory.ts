@@ -1,27 +1,30 @@
 import axios, { isAxiosError } from "axios";
 import { API_BASE_URL } from "./endpoint";
 
-export interface CategoryData {
-  // Define the structure of your todo data here
+export interface UpdateVaccationData {
+  // Define the structure of your update data here
   // You can update this interface based on the actual data structure
-  [key: string]: any;
+  name: string;
+  color: string;
 }
 
 interface ApiResponse {
-  data?: CategoryData[];
+  data?: any;
   error?: string;
 }
 
-const getAllCategories = async (): Promise<ApiResponse> => {
+const addVaccationCategory = async (
+  data: UpdateVaccationData
+): Promise<ApiResponse> => {
   try {
-    const response = await axios.get(API_BASE_URL);
+    const response = await axios.post(API_BASE_URL, data);
 
     return {
-      data: response.data.data,
+      data: response.data,
       error: undefined,
     };
   } catch (error) {
-    console.error("Error fetching categories:", error);
+    console.error("Error adding vacation category:", error);
 
     // Handle different types of errors
     if (isAxiosError(error)) {
@@ -30,7 +33,7 @@ const getAllCategories = async (): Promise<ApiResponse> => {
         error:
           error.response?.data?.message ||
           error.message ||
-          "Failed to fetch categories and todos",
+          "Failed to add vacation category",
       };
     }
 
@@ -41,4 +44,4 @@ const getAllCategories = async (): Promise<ApiResponse> => {
   }
 };
 
-export default getAllCategories;
+export default addVaccationCategory;

@@ -19,6 +19,8 @@ const MAPPING = {
   "arrow.clockwise": "refresh",
   "checkmark.circle": "check-circle",
   "new.releases": "fiber-new",
+  "plus.circle": "add-circle-outline",
+  "plus.circle.fill": "add-circle",
   xmark: "close",
   trash: "delete",
 } as any;

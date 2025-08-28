@@ -8,6 +8,7 @@ import {
 import React, { useState } from "react";
 import {
   Alert,
+  Modal,
   ScrollView,
   StyleSheet,
   TextInput,
@@ -111,6 +112,10 @@ export default function TaskDetails({
 
     // Update local state
     setEditedTask((prev) => ({ ...prev, done: newDoneStatus }));
+    console.log(
+      "Modified categories from getModifiedCategories:",
+      modifiedCategories
+    );
 
     // Update categories and navigate back
     onCategoriesUpdate(modifiedCategories, updatedCategories);
@@ -217,216 +222,228 @@ export default function TaskDetails({
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <ThemedText style={styles.backButtonText}>{"<"}</ThemedText>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.content}>
-        <ThemedText type="title" style={styles.taskName}>
-          {editedTask.name}
-        </ThemedText>
-
-        <View style={styles.notesSection}>
-          <ThemedText style={styles.sectionTitle}>Notes:</ThemedText>
-          {isEditingNotes ? (
-            <TextInput
-              style={styles.notesInput}
-              value={editedTask.notes || ""}
-              onChangeText={handleNotesChange}
-              placeholder="Add notes..."
-              multiline
-              onBlur={() => setIsEditingNotes(false)}
-              autoFocus
-              selection={{
-                start: (editedTask.notes || "").length,
-                end: (editedTask.notes || "").length,
-              }}
-            />
-          ) : (
-            <TouchableOpacity onPress={() => setIsEditingNotes(true)}>
-              <ThemedText style={styles.notesText}>
-                {editedTask.notes || "Tap to add notes..."}
-              </ThemedText>
-            </TouchableOpacity>
-          )}
+    <Modal
+      visible={true}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onBack}
+    >
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={onBack} style={styles.backButton}>
+            <IconSymbol name="xmark" size={24} color="white" />
+          </TouchableOpacity>
+          <ThemedText style={styles.headerTitle}>Task Details</ThemedText>
+          <View style={styles.placeholder} />
         </View>
 
-        <View style={styles.controlsSection}>
-          <TouchableOpacity
-            style={[
-              styles.toggleButton,
-              editedTask.canBeRepeated && styles.activeToggle,
-            ]}
-            onPress={handleCanBeRepeatedToggle}
-          >
-            <ThemedText style={styles.toggleText}>
-              Can Be Repeated: {editedTask.canBeRepeated ? "Yes" : "No"}
-            </ThemedText>
-          </TouchableOpacity>
+        <View style={styles.content}>
+          <ThemedText type="title" style={styles.taskName}>
+            {editedTask.name}
+          </ThemedText>
 
-          {editedTask.canBeRepeated ? (
-            <View style={styles.repeatOptions}>
-              <ThemedText style={styles.sectionTitle}>Select Days:</ThemedText>
-              <View style={styles.daysContainer}>
-                {DAYS_OF_WEEK.map((day) => (
-                  <TouchableOpacity
-                    key={day}
-                    style={[
-                      styles.dayButton,
-                      selectedDays.includes(day) && styles.selectedDay,
-                    ]}
-                    onPress={() => handleDayToggle(day)}
-                  >
-                    <ThemedText style={styles.dayText}>
-                      {day.slice(0, 3)}
-                    </ThemedText>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <ThemedText style={styles.sectionTitle}>
-                Or Select Day of Month:
-              </ThemedText>
-              <View style={styles.counterContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.counterButton,
-                    (selectedDayOfMonth === null || selectedDayOfMonth <= 1) &&
-                      styles.disabledButton,
-                  ]}
-                  onPress={() => {
-                    if (selectedDayOfMonth === null) {
-                      setSelectedDayOfMonth(1);
-                    } else if (selectedDayOfMonth > 1) {
-                      setSelectedDayOfMonth(selectedDayOfMonth - 1);
-                    }
-                    // Clear selected days when day of month is selected
-                    setSelectedDays([]);
-                  }}
-                  disabled={
-                    selectedDayOfMonth !== null && selectedDayOfMonth <= 1
-                  }
-                >
-                  <ThemedText
-                    style={[
-                      styles.counterButtonText,
-                      (selectedDayOfMonth === null ||
-                        selectedDayOfMonth <= 1) &&
-                        styles.disabledText,
-                    ]}
-                  >
-                    -
-                  </ThemedText>
-                </TouchableOpacity>
-
-                <View style={styles.counterValue}>
-                  <ThemedText style={styles.counterValueText}>
-                    {selectedDayOfMonth || 1}
-                  </ThemedText>
-                </View>
-
-                <TouchableOpacity
-                  style={[
-                    styles.counterButton,
-                    selectedDayOfMonth === 31 && styles.disabledButton,
-                  ]}
-                  onPress={() => {
-                    if (selectedDayOfMonth === null) {
-                      setSelectedDayOfMonth(2);
-                    } else if (selectedDayOfMonth < 31) {
-                      setSelectedDayOfMonth(selectedDayOfMonth + 1);
-                    }
-                    // Clear selected days when day of month is selected
-                    setSelectedDays([]);
-                  }}
-                  disabled={selectedDayOfMonth === 31}
-                >
-                  <ThemedText
-                    style={[
-                      styles.counterButtonText,
-                      selectedDayOfMonth === 31 && styles.disabledText,
-                    ]}
-                  >
-                    +
-                  </ThemedText>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ) : (
-            <View style={styles.dateSection}>
-              <ThemedText style={styles.sectionTitle}>Due Date:</ThemedText>
-              <TouchableOpacity
-                style={styles.dateButton}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <ThemedText style={styles.dateText}>
-                  {editedTask.when &&
-                  editedTask.when !== "" &&
-                  editedTask.when !== undefined &&
-                  !isNaN(new Date(editedTask.when).getTime())
-                    ? new Date(editedTask.when).toLocaleDateString()
-                    : "Select Date"}
+          <View style={styles.notesSection}>
+            <ThemedText style={styles.sectionTitle}>Notes:</ThemedText>
+            {isEditingNotes ? (
+              <TextInput
+                style={styles.notesInput}
+                value={editedTask.notes || ""}
+                onChangeText={handleNotesChange}
+                placeholder="Add notes..."
+                multiline
+                onBlur={() => setIsEditingNotes(false)}
+                autoFocus
+                selection={{
+                  start: (editedTask.notes || "").length,
+                  end: (editedTask.notes || "").length,
+                }}
+              />
+            ) : (
+              <TouchableOpacity onPress={() => setIsEditingNotes(true)}>
+                <ThemedText style={styles.notesText}>
+                  {editedTask.notes || "Tap to add notes..."}
                 </ThemedText>
               </TouchableOpacity>
-              {showDatePicker && (
-                <DateTimePicker
-                  value={
-                    editedTask.when &&
+            )}
+          </View>
+
+          <View style={styles.controlsSection}>
+            <TouchableOpacity
+              style={[
+                styles.toggleButton,
+                editedTask.canBeRepeated && styles.activeToggle,
+              ]}
+              onPress={handleCanBeRepeatedToggle}
+            >
+              <ThemedText style={styles.toggleText}>
+                Can Be Repeated: {editedTask.canBeRepeated ? "Yes" : "No"}
+              </ThemedText>
+            </TouchableOpacity>
+
+            {editedTask.canBeRepeated ? (
+              <View style={styles.repeatOptions}>
+                <ThemedText style={styles.sectionTitle}>
+                  Select Days:
+                </ThemedText>
+                <View style={styles.daysContainer}>
+                  {DAYS_OF_WEEK.map((day) => (
+                    <TouchableOpacity
+                      key={day}
+                      style={[
+                        styles.dayButton,
+                        selectedDays.includes(day) && styles.selectedDay,
+                      ]}
+                      onPress={() => handleDayToggle(day)}
+                    >
+                      <ThemedText style={styles.dayText}>
+                        {day.slice(0, 3)}
+                      </ThemedText>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <ThemedText style={styles.sectionTitle}>
+                  Or Select Day of Month:
+                </ThemedText>
+                <View style={styles.counterContainer}>
+                  <TouchableOpacity
+                    style={[
+                      styles.counterButton,
+                      (selectedDayOfMonth === null ||
+                        selectedDayOfMonth <= 1) &&
+                        styles.disabledButton,
+                    ]}
+                    onPress={() => {
+                      if (selectedDayOfMonth === null) {
+                        setSelectedDayOfMonth(1);
+                      } else if (selectedDayOfMonth > 1) {
+                        setSelectedDayOfMonth(selectedDayOfMonth - 1);
+                      }
+                      // Clear selected days when day of month is selected
+                      setSelectedDays([]);
+                    }}
+                    disabled={
+                      selectedDayOfMonth !== null && selectedDayOfMonth <= 1
+                    }
+                  >
+                    <ThemedText
+                      style={[
+                        styles.counterButtonText,
+                        (selectedDayOfMonth === null ||
+                          selectedDayOfMonth <= 1) &&
+                          styles.disabledText,
+                      ]}
+                    >
+                      -
+                    </ThemedText>
+                  </TouchableOpacity>
+
+                  <View style={styles.counterValue}>
+                    <ThemedText style={styles.counterValueText}>
+                      {selectedDayOfMonth || 1}
+                    </ThemedText>
+                  </View>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.counterButton,
+                      selectedDayOfMonth === 31 && styles.disabledButton,
+                    ]}
+                    onPress={() => {
+                      if (selectedDayOfMonth === null) {
+                        setSelectedDayOfMonth(2);
+                      } else if (selectedDayOfMonth < 31) {
+                        setSelectedDayOfMonth(selectedDayOfMonth + 1);
+                      }
+                      // Clear selected days when day of month is selected
+                      setSelectedDays([]);
+                    }}
+                    disabled={selectedDayOfMonth === 31}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.counterButtonText,
+                        selectedDayOfMonth === 31 && styles.disabledText,
+                      ]}
+                    >
+                      +
+                    </ThemedText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <View style={styles.dateSection}>
+                <ThemedText style={styles.sectionTitle}>Due Date:</ThemedText>
+                <TouchableOpacity
+                  style={styles.dateButton}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <ThemedText style={styles.dateText}>
+                    {editedTask.when &&
                     editedTask.when !== "" &&
                     editedTask.when !== undefined &&
                     !isNaN(new Date(editedTask.when).getTime())
-                      ? new Date(editedTask.when)
-                      : new Date()
-                  }
-                  mode="date"
-                  display="default"
-                  onChange={handleDateChange}
-                  minimumDate={new Date()}
-                />
-              )}
-            </View>
-          )}
+                      ? new Date(editedTask.when).toLocaleDateString()
+                      : "Select Date"}
+                  </ThemedText>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={
+                      editedTask.when &&
+                      editedTask.when !== "" &&
+                      editedTask.when !== undefined &&
+                      !isNaN(new Date(editedTask.when).getTime())
+                        ? new Date(editedTask.when)
+                        : new Date()
+                    }
+                    mode="date"
+                    display="default"
+                    onChange={handleDateChange}
+                    minimumDate={new Date()}
+                  />
+                )}
+              </View>
+            )}
+          </View>
+
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.updateButton]}
+              onPress={handleUpdate}
+            >
+              <IconSymbol name="arrow.clockwise" size={20} color="white" />
+              <ThemedText style={styles.actionButtonText}>Update</ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.actionButton,
+                editedTask.done ? styles.undoneButton : styles.doneButton,
+              ]}
+              onPress={handleDoneToggle}
+            >
+              <IconSymbol
+                name={editedTask.done ? "new.releases" : "checkmark.circle"}
+                size={20}
+                color="white"
+              />
+              <ThemedText style={styles.actionButtonText}>
+                {editedTask.done ? "Undone" : "Done"}
+              </ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, styles.deleteButton]}
+              onPress={handleDelete}
+            >
+              <IconSymbol name="trash" size={20} color="white" />
+              <ThemedText style={styles.actionButtonText}>Delete</ThemedText>
+            </TouchableOpacity>
+          </View>
         </View>
-
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.updateButton]}
-            onPress={handleUpdate}
-          >
-            <IconSymbol name="arrow.clockwise" size={20} color="white" />
-            <ThemedText style={styles.actionButtonText}>Update</ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.actionButton,
-              editedTask.done ? styles.undoneButton : styles.doneButton,
-            ]}
-            onPress={handleDoneToggle}
-          >
-            <IconSymbol
-              name={editedTask.done ? "new.releases" : "checkmark.circle"}
-              size={20}
-              color="white"
-            />
-            <ThemedText style={styles.actionButtonText}>
-              {editedTask.done ? "Undone" : "Done"}
-            </ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.actionButton, styles.deleteButton]}
-            onPress={handleDelete}
-          >
-            <IconSymbol name="trash" size={20} color="white" />
-            <ThemedText style={styles.actionButtonText}>Delete</ThemedText>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </Modal>
   );
 }
 
@@ -436,9 +453,12 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.9)",
   },
   header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingTop: 50,
     paddingHorizontal: 20,
-    paddingBottom: 10,
+    paddingBottom: 20,
   },
   backButton: {
     width: 40,
@@ -448,10 +468,13 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 20,
   },
-  backButtonText: {
+  headerTitle: {
     color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  placeholder: {
+    width: 40,
   },
   content: {
     flex: 1,

@@ -19,7 +19,6 @@ const visionTexts = [
   "Family Photos",
   "Friends Photos",
   "Home pics",
-  "50 Acer nu farmland",
 ];
 
 // Image data with names sorted alphabetically
@@ -89,6 +88,7 @@ const visionImages = [
     name: "Farm1",
     source: require("../../assets/vision/Farm1.jpeg"),
     height: 240,
+    notes: ["50 Acers nu farmland"],
   },
   {
     id: "8",

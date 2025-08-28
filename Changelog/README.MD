@@ -1,3 +1,6 @@
+#1.0.5 -
+Modifying to perform CRUD on category and task
+
 #1.0.4 -
 
 - Adding ability and screen to delete, update , mark task as done or not done

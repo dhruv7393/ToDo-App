@@ -1,4 +1,5 @@
 import axios, { isAxiosError } from "axios";
+import { API_BASE_URL } from "./endpoint";
 
 export interface UpdateVaccationData {
   // Define the structure of your update data here
@@ -15,10 +16,7 @@ const updateVaccation = async (
   data: UpdateVaccationData
 ): Promise<ApiResponse> => {
   try {
-    const response = await axios.patch(
-      "https://main.dgsooy6yeh5ar.amplifyapp.com/api/vaccation/",
-      data
-    );
+    const response = await axios.patch(API_BASE_URL, data);
 
     return {
       data: response.data,
