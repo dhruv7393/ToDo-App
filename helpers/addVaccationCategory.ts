@@ -6,6 +6,7 @@ export interface UpdateVaccationData {
   // You can update this interface based on the actual data structure
   name: string;
   color: string;
+  border: string;
 }
 
 interface ApiResponse {

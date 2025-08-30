@@ -121,6 +121,7 @@ export default function AddCategoryModal({
       const newCategoryData: UpdateVaccationData = {
         name: categoryName.trim(),
         color: selectedColor.value,
+        border: selectedColor.border,
       };
 
       const result = await addVaccationCategory(newCategoryData);
