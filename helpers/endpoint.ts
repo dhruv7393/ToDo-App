@@ -1,1 +1,2 @@
-export const API_BASE_URL = "http://localhost:3000/api/vaccation/";
+export const API_BASE_URL =
+  "https://main.dgsooy6yeh5ar.amplifyapp.com/api/vaccation/";
