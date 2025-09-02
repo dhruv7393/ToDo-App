@@ -37,7 +37,7 @@ export default function TodayScreen() {
 
       if (error) {
         setError(error);
-        console.warn('API Error:', error);
+        console.warn("API Error:", error);
         // Set empty array as fallback
         setCategories([]);
       } else {
@@ -45,8 +45,8 @@ export default function TodayScreen() {
         setError(null);
       }
     } catch (err) {
-      console.error('Fetch categories failed:', err);
-      setError('Failed to load categories');
+      console.error("Fetch categories failed:", err);
+      setError("Failed to load categories");
       setCategories([]);
     }
   };

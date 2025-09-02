@@ -42,8 +42,11 @@ jobs:
       - name: Setup Expo CLI
         run: npm install -g @expo/cli
 
+      - name: Clear Expo cache
+        run: npx expo install --fix
+
       - name: Prebuild Android with clean cache
-        run: npx expo prebuild --platform android --clean --clear
+        run: npx expo prebuild --platform android --clean
 
       - name: Create local.properties
         run: |
