@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18"
-          cache: "npm"
+          # Removed cache to ensure fresh builds
 
       - name: Setup Java JDK
         uses: actions/setup-java@v4
@@ -30,6 +30,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Clear caches for fresh build
+        run: |
+          npm cache clean --force
+          rm -rf node_modules
+
       - name: Install dependencies
         run: npm ci
 
@@ -37,7 +42,7 @@ jobs:
         run: npm install -g @expo/cli
 
       - name: Prebuild Android
-        run: npx expo prebuild --platform android --clean
+        run: npx expo prebuild --platform android --clean --clear
 
       - name: Create local.properties
         run: |
@@ -49,6 +54,7 @@ jobs:
       - name: Build Android APK
         run: |
           cd android
+          ./gradlew clean
           ./gradlew assembleRelease
 
       - name: Upload APK artifact
