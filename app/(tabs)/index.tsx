@@ -30,16 +30,24 @@ export default function TodayScreen() {
   const [showAddCategoryModal, setShowAddCategoryModal] = React.useState(false);
 
   const fetchCategories = async () => {
-    const result = await getAllCategories();
+    try {
+      const result = await getAllCategories();
 
-    const { data = [], error } = result;
+      const { data = [], error } = result;
 
-    if (error) {
-      setError(error);
-      // Handle error
-    } else {
-      setCategories(data);
-      // Process categories as needed
+      if (error) {
+        setError(error);
+        console.warn('API Error:', error);
+        // Set empty array as fallback
+        setCategories([]);
+      } else {
+        setCategories(data);
+        setError(null);
+      }
+    } catch (err) {
+      console.error('Fetch categories failed:', err);
+      setError('Failed to load categories');
+      setCategories([]);
     }
   };
 
