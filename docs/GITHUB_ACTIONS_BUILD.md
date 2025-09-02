@@ -5,23 +5,15 @@ This project is configured to build Android and iOS apps using GitHub Actions in
 ## Workflows
 
 ### 1. Android Build (`android-build.yml`)
+
 - **Triggers**: Push to main/master, Pull requests, Manual dispatch
 - **Output**: Unsigned APK and AAB files
 - **Use case**: Development builds and testing
 
-### 2. Android Release (`android-release.yml`)
-- **Triggers**: Git tags (v*), Manual dispatch
-- **Output**: Signed APK and AAB files (if keystore is configured)
-- **Use case**: Production releases
-
-### 3. iOS Build (`ios-build.yml`)
-- **Triggers**: Push to main/master, Pull requests, Manual dispatch
-- **Output**: iOS archive
-- **Use case**: Development builds (requires additional setup for signing)
-
 ## Setup Instructions
 
 ### Prerequisites
+
 1. Push your code to a GitHub repository
 2. Enable GitHub Actions in your repository settings
 
@@ -43,11 +35,13 @@ ANDROID_KEY_ALIAS         # Key alias
 #### Creating the keystore secrets:
 
 1. **Generate a keystore** (if you don't have one):
+
    ```bash
    keytool -genkey -v -keystore release.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
    ```
 
 2. **Encode keystore to Base64**:
+
    ```bash
    base64 -i release.keystore | pbcopy  # macOS
    base64 release.keystore | xclip -selection clipboard  # Linux
@@ -79,6 +73,7 @@ You can trigger builds manually from the GitHub Actions tab:
 ## Build Artifacts
 
 After a successful build, you can download the APK/AAB files from:
+
 - GitHub Actions → Your workflow run → Artifacts section
 
 ## Advantages over EAS Build
@@ -112,6 +107,7 @@ After a successful build, you can download the APK/AAB files from:
 4. Download your built APK from the artifacts
 
 For production releases, create a git tag:
+
 ```bash
 git tag v1.0.0
 git push origin v1.0.0
