@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/helpers/endpoint";
 import { useState } from "react";
 import {
   Dimensions,
@@ -20,6 +21,7 @@ const visionTexts = [
   "Friends Photos",
   "Home pics",
 ];
+visionTexts.push(API_BASE_URL);
 
 // Image data with names sorted alphabetically
 const visionImages = [
