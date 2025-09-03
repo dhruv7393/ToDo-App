@@ -144,12 +144,14 @@ export default function TodayScreen() {
                       onPress={() => handleCategoryClick(category._id)}
                       activeOpacity={0.7}
                     >
-                      <ThemedText type="default" style={styles.categoryText}>
-                        {category.isMarkedDone ? (
-                          <del>{category.name}</del>
-                        ) : (
-                          category.name
-                        )}
+                      <ThemedText
+                        type="default"
+                        style={[
+                          styles.categoryText,
+                          category.isMarkedDone && styles.strikethrough,
+                        ]}
+                      >
+                        {category.name}
                       </ThemedText>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -169,8 +171,14 @@ export default function TodayScreen() {
                           onPress={() => handleTaskClick(task, category._id)}
                           activeOpacity={0.7}
                         >
-                          <ThemedText type="default" style={styles.taskText}>
-                            - {task.done ? <del>{task.name}</del> : task.name}
+                          <ThemedText
+                            type="default"
+                            style={[
+                              styles.taskText,
+                              task.done && styles.strikethrough,
+                            ]}
+                          >
+                            - {task.name}
                           </ThemedText>
                           {(() => {
                             // Handle when date display
@@ -454,5 +462,10 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.3,
     shadowRadius: 6,
+  },
+  strikethrough: {
+    textDecorationLine: "line-through",
+    textDecorationStyle: "solid",
+    opacity: 0.6,
   },
 });

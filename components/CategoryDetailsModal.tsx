@@ -5,7 +5,7 @@ import {
   getModifiedCategories,
   toggleCategoryDone,
 } from "dhruvtodo";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   ImageBackground,
@@ -362,12 +362,13 @@ export default function CategoryDetailsModal({
                   },
                 ]}
               >
-                <ThemedText style={styles.previewText}>
-                  {isMarkedDone ? (
-                    <del>{categoryName || "Category Name"}</del>
-                  ) : (
-                    categoryName || "Category Name"
-                  )}
+                <ThemedText
+                  style={[
+                    styles.previewText,
+                    isMarkedDone && styles.strikethrough,
+                  ]}
+                >
+                  {categoryName || "Category Name"}
                 </ThemedText>
               </View>
             </View>
@@ -538,5 +539,10 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "600",
+  },
+  strikethrough: {
+    textDecorationLine: "line-through",
+    textDecorationStyle: "solid",
+    opacity: 0.6,
   },
 });
