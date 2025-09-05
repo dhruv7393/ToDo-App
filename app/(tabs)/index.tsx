@@ -9,11 +9,14 @@ import updateVaccation from "@/helpers/updateVaccation";
 import React, { useEffect } from "react";
 import {
   ImageBackground,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
+import DraggableFlatList, {
+  RenderItemParams,
+  ScaleDecorator,
+} from "react-native-draggable-flatlist";
 
 export default function TodayScreen() {
   const [categories, setCategories] = React.useState<CategoryData[]>([]);
@@ -29,6 +32,166 @@ export default function TodayScreen() {
     React.useState<string>("");
   const [showAddCategoryModal, setShowAddCategoryModal] = React.useState(false);
 
+  // Component to render draggable tasks within a category
+  const renderTaskItem = ({
+    item: task,
+    drag,
+    isActive,
+  }: RenderItemParams<any>) => {
+    return (
+      <ScaleDecorator>
+        <TouchableOpacity
+          style={[styles.taskItem, isActive && styles.activeTaskItem]}
+          onLongPress={drag}
+          onPress={() => handleTaskClick(task, selectedCategoryId)}
+          activeOpacity={0.7}
+        >
+          <View style={styles.taskContent}>
+            <TouchableOpacity style={styles.taskDragHandle} onLongPress={drag}>
+              <IconSymbol
+                name="chevron.right"
+                size={12}
+                color="rgba(255, 255, 255, 0.5)"
+              />
+            </TouchableOpacity>
+            <IconSymbol
+              name="square.fill"
+              size={12}
+              color="white"
+              style={styles.taskIcon}
+            />
+            <ThemedText
+              type="default"
+              style={[styles.taskText, task.done && styles.strikethrough]}
+            >
+              {task.name}
+            </ThemedText>
+          </View>
+          {(() => {
+            // Handle when date display
+            let showWhen = false;
+            let displayWhen = "";
+
+            if (task.when) {
+              if (typeof task.when === "string") {
+                // Check if it's a datetime timestamp (ISO format or similar)
+                const isDateTimeStamp =
+                  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(task.when) ||
+                  /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/.test(task.when);
+
+                if (isDateTimeStamp) {
+                  // Split datetime timestamp to get just the date part
+                  displayWhen = task.when
+                    .split("T")[0]
+                    .split(" ")[0]
+                    .split("-");
+                  displayWhen = `${displayWhen[2]}/${displayWhen[1]}`;
+                } else {
+                  displayWhen = task.when;
+                }
+              }
+
+              // Don't display if it's just a day of week or day of month
+              const daysOfWeek = [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+              ];
+              const isDayOfWeek = daysOfWeek.includes(displayWhen);
+              const isDayOfMonth = /^\d{1,2}$/.test(displayWhen);
+              const isCommaSeparatedDays =
+                displayWhen.includes(",") &&
+                displayWhen
+                  .split(",")
+                  .every((day: string) => daysOfWeek.includes(day.trim()));
+
+              showWhen = !(isDayOfWeek || isDayOfMonth || isCommaSeparatedDays);
+            }
+
+            return (
+              <>
+                {(showWhen || (task.notes && task.notes !== "")) && (
+                  <ThemedText type="default" style={styles.taskNotes}>
+                    {showWhen && displayWhen}
+                    {showWhen && task.notes && task.notes !== "" && ", "}
+                    {task.notes && task.notes !== "" && task.notes}
+                  </ThemedText>
+                )}
+              </>
+            );
+          })()}
+        </TouchableOpacity>
+      </ScaleDecorator>
+    );
+  };
+
+  // Component to render draggable categories
+  const renderCategoryItem = ({
+    item: category,
+    drag,
+    isActive,
+  }: RenderItemParams<CategoryData>) => {
+    return (
+      <ScaleDecorator>
+        <TouchableOpacity
+          style={[styles.categoryBox, isActive && styles.activeCategoryItem]}
+          onLongPress={drag}
+          activeOpacity={0.7}
+        >
+          <View style={styles.categoryHeader}>
+            <TouchableOpacity style={styles.dragHandle} onLongPress={drag}>
+              <IconSymbol
+                name="chevron.right"
+                size={16}
+                color="rgba(255, 255, 255, 0.5)"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.categoryNameButton}
+              onPress={() => handleCategoryClick(category._id)}
+              activeOpacity={0.7}
+            >
+              <ThemedText
+                type="default"
+                style={[
+                  styles.categoryText,
+                  category.isMarkedDone && styles.strikethrough,
+                ]}
+              >
+                {category.name}
+              </ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.addTaskButton}
+              onPress={() => handleAddTask(category._id)}
+              activeOpacity={0.7}
+            >
+              <IconSymbol name="plus.circle" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
+          {category.tasks.length > 0 && (
+            <View style={styles.tasksContainer}>
+              <DraggableFlatList
+                data={category.tasks}
+                renderItem={(props) => {
+                  setSelectedCategoryId(category._id);
+                  return renderTaskItem(props);
+                }}
+                keyExtractor={(task: any) => task._id}
+                onDragEnd={({ data }) => handleTaskDragEnd(category._id, data)}
+                containerStyle={styles.tasksList}
+              />
+            </View>
+          )}
+        </TouchableOpacity>
+      </ScaleDecorator>
+    );
+  };
+
   const fetchCategories = async () => {
     try {
       const result = await getAllCategories();
@@ -41,7 +204,24 @@ export default function TodayScreen() {
         // Set empty array as fallback
         setCategories([]);
       } else {
-        setCategories(data);
+        // Sort categories by priority, then by name if no priority
+        const sortedCategories = data
+          .map((category, index) => ({
+            ...category,
+            priority: category.priority || index + 1,
+            tasks:
+              category.tasks
+                ?.map((task: any, taskIndex: number) => ({
+                  ...task,
+                  priority: task.priority || taskIndex + 1,
+                }))
+                .sort(
+                  (a: any, b: any) => (a.priority || 0) - (b.priority || 0)
+                ) || [],
+          }))
+          .sort((a, b) => (a.priority || 0) - (b.priority || 0));
+
+        setCategories(sortedCategories);
         setError(null);
       }
     } catch (err) {
@@ -95,6 +275,67 @@ export default function TodayScreen() {
     fetchCategories(); // Refresh the categories list
   };
 
+  const handleCategoryDragEnd = async (data: CategoryData[]) => {
+    // Update priorities based on new order
+    const updatedCategories = data.map((category, index) => ({
+      ...category,
+      priority: index + 1,
+    }));
+
+    setCategories(updatedCategories);
+
+    try {
+      // Update backend with new priorities
+      await updateVaccation(updatedCategories);
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Error updating category order"
+      );
+      // Revert on error
+      fetchCategories();
+    }
+  };
+
+  const handleTaskDragEnd = async (
+    categoryId: string,
+    reorderedTasks: any[]
+  ) => {
+    // Update task priorities based on new order
+    const updatedTasks = reorderedTasks.map((task, index) => ({
+      ...task,
+      priority: index + 1,
+    }));
+
+    // Update categories with reordered tasks
+    const updatedCategories = categories.map((category) => {
+      if (category._id === categoryId) {
+        return {
+          ...category,
+          tasks: updatedTasks,
+        };
+      }
+      return category;
+    });
+
+    setCategories(updatedCategories);
+
+    try {
+      // Find the modified category for backend update
+      const modifiedCategory = updatedCategories.find(
+        (cat) => cat._id === categoryId
+      );
+      if (modifiedCategory) {
+        await updateVaccation([modifiedCategory]);
+      }
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Error updating task order"
+      );
+      // Revert on error
+      fetchCategories();
+    }
+  };
+
   const handleCategoriesUpdate = async (
     modifiedCategories: CategoryData[],
     updatedCategories: CategoryData[]
@@ -122,155 +363,25 @@ export default function TodayScreen() {
     >
       <View style={styles.overlay}>
         <View style={styles.content}>
-          <ScrollView
-            contentContainerStyle={styles.categoriesContainer}
-            showsVerticalScrollIndicator={false}
-            style={styles.scrollView}
-          >
-            {error ? (
-              <ThemedText type="default" style={styles.errorMessage}>
-                {error}
-              </ThemedText>
-            ) : categories.length > 0 ? (
-              categories.map((category, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.categoryBox}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.categoryHeader}>
-                    <TouchableOpacity
-                      style={styles.categoryNameButton}
-                      onPress={() => handleCategoryClick(category._id)}
-                      activeOpacity={0.7}
-                    >
-                      <ThemedText
-                        type="default"
-                        style={[
-                          styles.categoryText,
-                          category.isMarkedDone && styles.strikethrough,
-                        ]}
-                      >
-                        {category.name}
-                      </ThemedText>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.addTaskButton}
-                      onPress={() => handleAddTask(category._id)}
-                      activeOpacity={0.7}
-                    >
-                      <IconSymbol name="plus.circle" size={24} color="white" />
-                    </TouchableOpacity>
-                  </View>
-                  {category.tasks.length > 0 && (
-                    <View style={styles.tasksContainer}>
-                      {category.tasks.map((task: any) => (
-                        <TouchableOpacity
-                          key={task._id}
-                          style={styles.taskItem}
-                          onPress={() => handleTaskClick(task, category._id)}
-                          activeOpacity={0.7}
-                        >
-                          <ThemedText
-                            type="default"
-                            style={[
-                              styles.taskText,
-                              task.done && styles.strikethrough,
-                            ]}
-                          >
-                            - {task.name}
-                          </ThemedText>
-                          {(() => {
-                            // Handle when date display
-                            let showWhen = false;
-                            let displayWhen = "";
-
-                            if (task.when) {
-                              if (typeof task.when === "string") {
-                                // Check if it's a datetime timestamp (ISO format or similar)
-                                const isDateTimeStamp =
-                                  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(
-                                    task.when
-                                  ) ||
-                                  /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/.test(
-                                    task.when
-                                  );
-
-                                if (isDateTimeStamp) {
-                                  // Split datetime timestamp to get just the date part
-                                  displayWhen = task.when
-                                    .split("T")[0]
-                                    .split(" ")[0]
-                                    .split("-");
-                                  displayWhen = `${displayWhen[2]}/${displayWhen[1]}`;
-                                } else {
-                                  displayWhen = task.when;
-                                }
-                              }
-
-                              // Don't display if it's just a day of week or day of month
-                              const daysOfWeek = [
-                                "Monday",
-                                "Tuesday",
-                                "Wednesday",
-                                "Thursday",
-                                "Friday",
-                                "Saturday",
-                                "Sunday",
-                              ];
-                              const isDayOfWeek =
-                                daysOfWeek.includes(displayWhen);
-                              const isDayOfMonth = /^\d{1,2}$/.test(
-                                displayWhen
-                              );
-                              const isCommaSeparatedDays =
-                                displayWhen.includes(",") &&
-                                displayWhen
-                                  .split(",")
-                                  .every((day: string) =>
-                                    daysOfWeek.includes(day.trim())
-                                  );
-
-                              showWhen = !(
-                                isDayOfWeek ||
-                                isDayOfMonth ||
-                                isCommaSeparatedDays
-                              );
-                            }
-
-                            return (
-                              <>
-                                {(showWhen ||
-                                  (task.notes && task.notes !== "")) && (
-                                  <ThemedText
-                                    type="default"
-                                    style={styles.taskNotes}
-                                  >
-                                    {showWhen && displayWhen}
-                                    {showWhen &&
-                                      task.notes &&
-                                      task.notes !== "" &&
-                                      ", "}
-                                    {task.notes &&
-                                      task.notes !== "" &&
-                                      task.notes}
-                                  </ThemedText>
-                                )}
-                              </>
-                            );
-                          })()}
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ))
-            ) : (
-              <ThemedText type="default" style={styles.message}>
-                Loading categories...
-              </ThemedText>
-            )}
-          </ScrollView>
+          {error ? (
+            <ThemedText type="default" style={styles.errorMessage}>
+              {error}
+            </ThemedText>
+          ) : categories.length > 0 ? (
+            <DraggableFlatList
+              data={categories}
+              renderItem={renderCategoryItem}
+              keyExtractor={(category) => category._id}
+              onDragEnd={({ data }) => handleCategoryDragEnd(data)}
+              contentContainerStyle={styles.categoriesContainer}
+              showsVerticalScrollIndicator={false}
+              style={styles.scrollView}
+            />
+          ) : (
+            <ThemedText type="default" style={styles.message}>
+              Loading categories...
+            </ThemedText>
+          )}
         </View>
       </View>
 
@@ -372,6 +483,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  dragHandle: {
+    padding: 5,
+    marginRight: 5,
+  },
   categoryText: {
     color: "white",
     fontSize: 16,
@@ -405,6 +520,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingLeft: 10,
   },
+  tasksList: {
+    maxHeight: 200, // Limit height to prevent scroll conflicts
+  },
   taskText: {
     color: "white",
     fontSize: 16,
@@ -426,6 +544,39 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 8,
     backgroundColor: "rgba(255, 255, 255, 0.05)",
+  },
+  activeTaskItem: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  taskContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  taskDragHandle: {
+    padding: 3,
+    marginRight: 5,
+  },
+  taskIcon: {
+    marginRight: 8,
+  },
+  activeCategoryItem: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   taskNotes: {
     color: "rgba(255, 255, 255, 0.8)",
