@@ -1,3 +1,16 @@
+#1.0.6 -
+Adding drag-and-drop functionality for categories and tasks with automatic priority management
+
+- Implemented drag-and-drop reordering for categories
+- Implemented drag-and-drop reordering for tasks within categories
+- Added automatic priority assignment based on order (1 to N)
+- Created DraggableList, DraggableCategoryList, and DraggableTaskList components
+- Added priority management helpers with API integration via updateVaccation
+- Visual feedback with scaling animations during drag operations
+- Optimistic updates with error handling and state rollback
+- Categories and tasks now sort by priority on app load
+- Added comprehensive documentation for drag-and-drop features
+
 #1.0.5 -
 Modifying to perform CRUD on category and task
 

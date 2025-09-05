@@ -5,7 +5,7 @@ import {
   toggleTaskDone,
   updateTask,
 } from "dhruvtodo";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Modal,
