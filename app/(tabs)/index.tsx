@@ -187,33 +187,25 @@ export default function TodayScreen() {
 
                             if (task.when) {
                               if (typeof task.when === "string") {
-                                displayWhen = task.when;
-                                // Remove year from common date formats
-                                // Handle formats like "12/25/2024" or "12/25/24" -> "12/25"
-                                displayWhen = displayWhen.replace(
-                                  /\/\d{2,4}$/g,
-                                  ""
-                                );
-                                // Handle formats like "December 25, 2024" -> "December 25"
-                                displayWhen = displayWhen.replace(
-                                  /,\s*\d{4}$/g,
-                                  ""
-                                );
-                                // Handle formats like "25/12/2024" (day/month/year) -> "25/12"
-                                displayWhen = displayWhen.replace(
-                                  /(\d{1,2}\/\d{1,2})\/\d{2,4}$/g,
-                                  "$1"
-                                );
-                              } else {
-                                // Format date without year (MM/DD format)
-                                const date = new Date(task.when);
-                                displayWhen = date.toLocaleDateString(
-                                  undefined,
-                                  {
-                                    month: "numeric",
-                                    day: "numeric",
-                                  }
-                                );
+                                // Check if it's a datetime timestamp (ISO format or similar)
+                                const isDateTimeStamp =
+                                  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(
+                                    task.when
+                                  ) ||
+                                  /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/.test(
+                                    task.when
+                                  );
+
+                                if (isDateTimeStamp) {
+                                  // Split datetime timestamp to get just the date part
+                                  displayWhen = task.when
+                                    .split("T")[0]
+                                    .split(" ")[0]
+                                    .split("-");
+                                  displayWhen = `${displayWhen[2]}/${displayWhen[1]}`;
+                                } else {
+                                  displayWhen = task.when;
+                                }
                               }
 
                               // Don't display if it's just a day of week or day of month

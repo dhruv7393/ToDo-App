@@ -1,4 +1,3 @@
-import { API_BASE_URL } from "@/helpers/endpoint";
 import { useState } from "react";
 import {
   Dimensions,
@@ -19,9 +18,7 @@ const visionTexts = [
   "Tane, mane, dhane, atmae, antar, kaame, family ane friends thi sukhi thavai",
   "Family Photos",
   "Friends Photos",
-  "Home pics",
 ];
-visionTexts.push(API_BASE_URL);
 
 // Image data with names sorted alphabetically
 const visionImages = [
@@ -87,6 +84,24 @@ const visionImages = [
   },
   {
     id: "7",
+    name: "Home1",
+    source: require("../../assets/vision/Home1.jpeg"),
+    height: 240,
+  },
+  {
+    id: "8",
+    name: "Home2",
+    source: require("../../assets/vision/Home2.jpeg"),
+    height: 210,
+  },
+  {
+    id: "8",
+    name: "Home3",
+    source: require("../../assets/vision/Home3.jpeg"),
+    height: 210,
+  },
+  {
+    id: "7",
     name: "Farm1",
     source: require("../../assets/vision/Farm1.jpeg"),
     height: 240,
@@ -102,6 +117,24 @@ const visionImages = [
     id: "8",
     name: "Farm3",
     source: require("../../assets/vision/Farm3.jpeg"),
+    height: 210,
+  },
+  {
+    id: "7",
+    name: "Work3",
+    source: require("../../assets/vision/Work3.jpeg"),
+    height: 240,
+  },
+  {
+    id: "8",
+    name: "Work2",
+    source: require("../../assets/vision/Work2.jpeg"),
+    height: 210,
+  },
+  {
+    id: "8",
+    name: "Work1",
+    source: require("../../assets/vision/Work1.jpeg"),
     height: 210,
   },
   {
