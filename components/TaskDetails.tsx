@@ -5,7 +5,7 @@ import {
   toggleTaskDone,
   updateTask,
 } from "dhruvtodo";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Modal,
@@ -147,7 +147,7 @@ export default function TaskDetails({
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
-      setEditedTask((prev) => ({ ...prev, when: selectedDate }));
+      setEditedTask((prev) => ({ ...prev, when: selectedDate.toISOString() }));
     }
   };
 
