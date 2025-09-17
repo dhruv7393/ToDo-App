@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Animated, Platform, TouchableOpacity, View } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
@@ -65,8 +65,7 @@ export default function TabLayout() {
         style={{
           position: "absolute",
           bottom: 30, // 30px from bottom to ensure 20px clear space
-          left: "50%", // Center horizontally
-          transform: [{ translateX: -50 }], // Offset by half width to center
+          alignSelf: "center", // Center the tab bar horizontally
           backgroundColor: "#eab676", // Custom background color
           borderTopWidth: 0,
           elevation: 0,
@@ -78,9 +77,10 @@ export default function TabLayout() {
           }),
           flexDirection: "row",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "space-around", // Better spacing between tabs
           opacity: tabBarOpacity,
-          paddingHorizontal: 20,
+          paddingHorizontal: 15,
+          minWidth: 120, // Minimum width to ensure proper layout
         }}
       >
         {state.routes.map((route: any, index: number) => {
@@ -112,10 +112,10 @@ export default function TabLayout() {
               key={route.key}
               onPress={onPress}
               style={{
-                alignItems: "center",
-                justifyContent: "center",
-                paddingHorizontal: 15,
+                alignItems: "flex-end",
+                justifyContent: "space-between",
                 paddingVertical: 8,
+                // Minimum width for each tab
               }}
             >
               {options.tabBarIcon &&

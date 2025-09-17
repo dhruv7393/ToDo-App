@@ -1,6 +1,6 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { addTask, getModifiedCategories } from "dhruvtodo";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Modal,
@@ -137,8 +137,7 @@ export default function AddTaskModal({
 
       Alert.alert("Success", "Task added successfully!");
       handleClose();
-    } catch (error) {
-      console.error("Error adding task:", error);
+    } catch {
       Alert.alert("Error", "Failed to add task");
     }
   };

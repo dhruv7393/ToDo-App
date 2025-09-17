@@ -1,7 +1,7 @@
 import addVaccationCategory, {
   UpdateVaccationData,
 } from "@/helpers/addVaccationCategory";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   ImageBackground,
@@ -126,8 +126,6 @@ export default function AddCategoryModal({
 
       const result = await addVaccationCategory(newCategoryData);
 
-      console.log("Add category API result:", result);
-
       if (result.error) {
         Alert.alert("Error", result.error);
       } else {
@@ -136,8 +134,7 @@ export default function AddCategoryModal({
         onClose();
         onCategoryAdded(); // Refresh the categories list
       }
-    } catch (error) {
-      console.error("Error adding category:", error);
+    } catch {
       Alert.alert("Error", "Failed to add category. Please try again.");
     } finally {
       setIsLoading(false);

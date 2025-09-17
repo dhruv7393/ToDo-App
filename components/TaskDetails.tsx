@@ -112,10 +112,6 @@ export default function TaskDetails({
 
     // Update local state
     setEditedTask((prev) => ({ ...prev, done: newDoneStatus }));
-    console.log(
-      "Modified categories from getModifiedCategories:",
-      modifiedCategories
-    );
 
     // Update categories and navigate back
     onCategoriesUpdate(modifiedCategories, updatedCategories);
@@ -170,17 +166,10 @@ export default function TaskDetails({
       updatedTask
     );
 
-    console.log("Updated categories from updateTask:", updatedCategories);
-
     // Get modified categories for API update
     const modifiedCategories = getModifiedCategories(
       categories,
       updatedCategories
-    );
-
-    console.log(
-      "Modified categories from getModifiedCategories:",
-      modifiedCategories
     );
 
     // Update categories through callback
@@ -191,11 +180,6 @@ export default function TaskDetails({
   };
 
   const handleDelete = () => {
-    console.log("Delete operation started");
-    console.log("Categories data received:", categories);
-    console.log("Category ID:", categoryId);
-    console.log("Task name:", task.name);
-
     // Use deleteTask from dhruvtodo
     const updatedCategories = deleteTask(
       JSON.parse(JSON.stringify(categories)), // Deep copy to avoid direct state mutation
@@ -203,17 +187,10 @@ export default function TaskDetails({
       task.name
     );
 
-    console.log("Updated categories from deleteTask:", updatedCategories);
-
     // Get modified categories for API update
     const modifiedCategories = getModifiedCategories(
       categories,
       updatedCategories
-    );
-
-    console.log(
-      "Modified categories from getModifiedCategories:",
-      modifiedCategories
     );
 
     // Update categories and navigate back
@@ -409,14 +386,6 @@ export default function TaskDetails({
 
           <View style={styles.actionButtons}>
             <TouchableOpacity
-              style={[styles.actionButton, styles.updateButton]}
-              onPress={handleUpdate}
-            >
-              <IconSymbol name="arrow.clockwise" size={20} color="white" />
-              <ThemedText style={styles.actionButtonText}>Update</ThemedText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
               style={[
                 styles.actionButton,
                 editedTask.done ? styles.undoneButton : styles.doneButton,
@@ -432,7 +401,13 @@ export default function TaskDetails({
                 {editedTask.done ? "Undone" : "Done"}
               </ThemedText>
             </TouchableOpacity>
-
+            <TouchableOpacity
+              style={[styles.actionButton, styles.updateButton]}
+              onPress={handleUpdate}
+            >
+              <IconSymbol name="arrow.clockwise" size={20} color="white" />
+              <ThemedText style={styles.actionButtonText}>Update</ThemedText>
+            </TouchableOpacity>
             <TouchableOpacity
               style={[styles.actionButton, styles.deleteButton]}
               onPress={handleDelete}

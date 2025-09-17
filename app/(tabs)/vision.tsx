@@ -16,8 +16,6 @@ const { width } = Dimensions.get("window");
 // Array of strings to display above images
 const visionTexts = [
   "Tane, mane, dhane, atmae, antar, kaame, family ane friends thi sukhi thavai",
-  "Family Photos",
-  "Friends Photos",
 ];
 
 // Image data with names sorted alphabetically

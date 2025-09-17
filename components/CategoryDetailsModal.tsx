@@ -150,14 +150,10 @@ export default function CategoryDetailsModal({
 
   const handleDeleteCategory = async () => {
     try {
-      console.log("Deleting category with ID:", categoryId);
-
       // Call API to delete category
       const result = await deleteVaccationCategory({
         ids: [categoryId],
       });
-
-      console.log("API delete result:", result);
 
       if (result.error) {
         Alert.alert("Error", result.error);
@@ -170,21 +166,15 @@ export default function CategoryDetailsModal({
         categoryId
       );
 
-      console.log("Updated categories after deletion:", updatedCategories);
-
       // Get modified categories to find the difference
       const modifiedCategories = getModifiedCategories(
         categories,
         updatedCategories
       );
 
-      console.log("Modified categories:", modifiedCategories);
-
       // Update the category data with updateVaccation if there are modifications
       if (modifiedCategories.length > 0) {
         const updateResult = await updateVaccation(modifiedCategories);
-
-        console.log("Update vaccination result:", updateResult);
 
         if (updateResult.error) {
           Alert.alert("Error", updateResult.error);
@@ -196,8 +186,7 @@ export default function CategoryDetailsModal({
       onCategoriesUpdate(modifiedCategories, updatedCategories);
 
       handleClose();
-    } catch (error) {
-      console.error("Error deleting category:", error);
+    } catch {
       Alert.alert("Error", "Failed to delete category");
     }
   };
@@ -244,15 +233,12 @@ export default function CategoryDetailsModal({
         updatedCategories
       );
 
-      console.log("Update category - modifiedCategories:", modifiedCategories);
-
       // Update categories through callback
       onCategoriesUpdate(modifiedCategories, updatedCategories);
 
       Alert.alert("Success", "Category updated successfully!");
       handleClose();
-    } catch (error) {
-      console.error("Error updating category:", error);
+    } catch {
       Alert.alert("Error", "Failed to update category");
     }
   };

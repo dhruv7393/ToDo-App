@@ -23,6 +23,8 @@ const MAPPING = {
   "plus.circle.fill": "add-circle",
   xmark: "close",
   trash: "delete",
+  "chevron.up": "arrow-upward",
+  "chevron.down": "arrow-downward",
 } as any;
 
 /**

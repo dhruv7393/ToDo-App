@@ -6,6 +6,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import getAllCategories, { CategoryData } from "@/helpers/getAllCategories";
 import updateVaccation from "@/helpers/updateVaccation";
+import { getModifiedCategories, updateTaskPriority } from "dhruvtodo";
 import React, { useEffect } from "react";
 import {
   ImageBackground,
@@ -28,6 +29,10 @@ export default function TodayScreen() {
   const [selectedCategoryForEdit, setSelectedCategoryForEdit] =
     React.useState<string>("");
   const [showAddCategoryModal, setShowAddCategoryModal] = React.useState(false);
+  const [selectedTaskForPriority, setSelectedTaskForPriority] = React.useState<{
+    taskName: string;
+    categoryId: string;
+  } | null>(null);
 
   const fetchCategories = async () => {
     try {
@@ -52,18 +57,23 @@ export default function TodayScreen() {
   };
 
   const handleTaskClick = (task: any, categoryId: string) => {
+    // Clear priority selection when task is clicked normally
+    clearPrioritySelection();
+
     setSelectedTask(task);
     setSelectedCategoryId(categoryId);
     setShowTaskDetails(true);
   };
 
   const handleBackToCategories = () => {
+    clearPrioritySelection();
     setShowTaskDetails(false);
     setSelectedTask(null);
     setSelectedCategoryId("");
   };
 
   const handleAddTask = (categoryId: string) => {
+    clearPrioritySelection();
     setAddTaskCategoryId(categoryId);
     setShowAddTaskModal(true);
   };
@@ -74,6 +84,7 @@ export default function TodayScreen() {
   };
 
   const handleCategoryClick = (categoryId: string) => {
+    clearPrioritySelection();
     setSelectedCategoryForEdit(categoryId);
     setShowCategoryDetails(true);
   };
@@ -84,6 +95,7 @@ export default function TodayScreen() {
   };
 
   const handleAddCategory = () => {
+    clearPrioritySelection();
     setShowAddCategoryModal(true);
   };
 
@@ -109,6 +121,65 @@ export default function TodayScreen() {
     }
   };
 
+  const handleTaskLongPress = (taskName: string, categoryId: string) => {
+    // Clear any other selected items first
+    setSelectedTask(null);
+    setSelectedCategoryForEdit("");
+    setShowTaskDetails(false);
+    setShowCategoryDetails(false);
+
+    // Set the selected task for priority adjustment
+    setSelectedTaskForPriority({ taskName, categoryId });
+  };
+
+  const handlePriorityChange = async (
+    taskName: string,
+    categoryId: string,
+    newPriority: number
+  ) => {
+    try {
+      // Get the current category to check task count
+      const currentCategory = categories.find((cat) => cat._id === categoryId);
+      if (!currentCategory) {
+        return;
+      }
+
+      // Ensure priority is within valid range
+      const clampedPriority = Math.max(
+        1,
+        Math.min(newPriority, currentCategory.tasks.length)
+      );
+
+      // Use updateTaskPriority from dhruvtodo
+      const updatedCategories = updateTaskPriority(
+        JSON.parse(JSON.stringify(categories)), // Deep copy to avoid direct state mutation
+        categoryId,
+        taskName,
+        clampedPriority
+      );
+
+      // Get modified categories for API update
+      const modifiedCategories = getModifiedCategories(
+        categories,
+        updatedCategories
+      );
+
+      // Update categories through API and local state
+      await handleCategoriesUpdate(modifiedCategories, updatedCategories);
+
+      // Clear the priority selection after successful update
+      clearPrioritySelection();
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Error updating priority"
+      );
+    }
+  };
+
+  const clearPrioritySelection = () => {
+    setSelectedTaskForPriority(null);
+  };
+
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -121,7 +192,11 @@ export default function TodayScreen() {
       imageStyle={styles.backgroundImage}
     >
       <View style={styles.overlay}>
-        <View style={styles.content}>
+        <TouchableOpacity
+          style={styles.content}
+          activeOpacity={1}
+          onPress={clearPrioritySelection}
+        >
           <ScrollView
             contentContainerStyle={styles.categoriesContainer}
             showsVerticalScrollIndicator={false}
@@ -164,103 +239,179 @@ export default function TodayScreen() {
                   </View>
                   {category.tasks.length > 0 && (
                     <View style={styles.tasksContainer}>
-                      {category.tasks.map((task: any) => (
-                        <TouchableOpacity
-                          key={task._id}
-                          style={styles.taskItem}
-                          onPress={() => handleTaskClick(task, category._id)}
-                          activeOpacity={0.7}
-                        >
-                          <ThemedText
-                            type="default"
-                            style={[
-                              styles.taskText,
-                              task.done && styles.strikethrough,
-                            ]}
-                          >
-                            - {task.name}
-                          </ThemedText>
-                          {(() => {
-                            // Handle when date display
-                            let showWhen = false;
-                            let displayWhen = "";
+                      {category.tasks.map((task: any, taskIndex: number) => {
+                        const isSelectedForPriority =
+                          selectedTaskForPriority?.taskName === task.name &&
+                          selectedTaskForPriority?.categoryId === category._id;
+                        const currentPriority = task.priority || taskIndex + 1;
+                        const maxPriority = category.tasks.length;
 
-                            if (task.when) {
-                              if (typeof task.when === "string") {
-                                // Check if it's a datetime timestamp (ISO format or similar)
-                                const isDateTimeStamp =
-                                  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(
-                                    task.when
-                                  ) ||
-                                  /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/.test(
-                                    task.when
-                                  );
-
-                                if (isDateTimeStamp) {
-                                  // Split datetime timestamp to get just the date part
-                                  displayWhen = task.when
-                                    .split("T")[0]
-                                    .split(" ")[0]
-                                    .split("-");
-                                  displayWhen = `${displayWhen[2]}/${displayWhen[1]}`;
-                                } else {
-                                  displayWhen = task.when;
-                                }
+                        return (
+                          <View key={task._id}>
+                            <TouchableOpacity
+                              style={[
+                                styles.taskItem,
+                                isSelectedForPriority &&
+                                  styles.selectedTaskItem,
+                              ]}
+                              onPress={() =>
+                                handleTaskClick(task, category._id)
                               }
+                              onLongPress={() =>
+                                handleTaskLongPress(task.name, category._id)
+                              }
+                              activeOpacity={0.7}
+                            >
+                              <ThemedText
+                                type="default"
+                                style={[
+                                  styles.taskText,
+                                  task.done && styles.strikethrough,
+                                ]}
+                              >
+                                - {task.name}
+                              </ThemedText>
+                              {(() => {
+                                // Handle when date display
+                                let showWhen = false;
+                                let displayWhen = "";
 
-                              // Don't display if it's just a day of week or day of month
-                              const daysOfWeek = [
-                                "Monday",
-                                "Tuesday",
-                                "Wednesday",
-                                "Thursday",
-                                "Friday",
-                                "Saturday",
-                                "Sunday",
-                              ];
-                              const isDayOfWeek =
-                                daysOfWeek.includes(displayWhen);
-                              const isDayOfMonth = /^\d{1,2}$/.test(
-                                displayWhen
-                              );
-                              const isCommaSeparatedDays =
-                                displayWhen.includes(",") &&
-                                displayWhen
-                                  .split(",")
-                                  .every((day: string) =>
-                                    daysOfWeek.includes(day.trim())
+                                if (task.when) {
+                                  if (typeof task.when === "string") {
+                                    // Check if it's a datetime timestamp (ISO format or similar)
+                                    const isDateTimeStamp =
+                                      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(
+                                        task.when
+                                      ) ||
+                                      /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/.test(
+                                        task.when
+                                      );
+
+                                    if (isDateTimeStamp) {
+                                      // Split datetime timestamp to get just the date part
+                                      displayWhen = task.when
+                                        .split("T")[0]
+                                        .split(" ")[0]
+                                        .split("-");
+                                      displayWhen = `${displayWhen[2]}/${displayWhen[1]}`;
+                                    } else {
+                                      displayWhen = task.when;
+                                    }
+                                  }
+
+                                  // Don't display if it's just a day of week or day of month
+                                  const daysOfWeek = [
+                                    "Monday",
+                                    "Tuesday",
+                                    "Wednesday",
+                                    "Thursday",
+                                    "Friday",
+                                    "Saturday",
+                                    "Sunday",
+                                  ];
+                                  const isDayOfWeek =
+                                    daysOfWeek.includes(displayWhen);
+                                  const isDayOfMonth = /^\d{1,2}$/.test(
+                                    displayWhen
                                   );
+                                  const isCommaSeparatedDays =
+                                    displayWhen.includes(",") &&
+                                    displayWhen
+                                      .split(",")
+                                      .every((day: string) =>
+                                        daysOfWeek.includes(day.trim())
+                                      );
 
-                              showWhen = !(
-                                isDayOfWeek ||
-                                isDayOfMonth ||
-                                isCommaSeparatedDays
-                              );
-                            }
+                                  showWhen = !(
+                                    isDayOfWeek ||
+                                    isDayOfMonth ||
+                                    isCommaSeparatedDays
+                                  );
+                                }
 
-                            return (
-                              <>
-                                {(showWhen ||
-                                  (task.notes && task.notes !== "")) && (
-                                  <ThemedText
-                                    type="default"
-                                    style={styles.taskNotes}
-                                  >
-                                    {showWhen && displayWhen}
-                                    {showWhen &&
-                                      task.notes &&
-                                      task.notes !== "" &&
-                                      ", "}
-                                    {task.notes &&
-                                      task.notes !== "" &&
-                                      task.notes}
-                                  </ThemedText>
-                                )}
-                              </>
-                            );
-                          })()}
-                        </TouchableOpacity>
-                      ))}
+                                return (
+                                  <>
+                                    {(showWhen ||
+                                      (task.notes && task.notes !== "")) && (
+                                      <ThemedText
+                                        type="default"
+                                        style={styles.taskNotes}
+                                      >
+                                        {showWhen && displayWhen}
+                                        {showWhen &&
+                                          task.notes &&
+                                          task.notes !== "" &&
+                                          ", "}
+                                        {task.notes &&
+                                          task.notes !== "" &&
+                                          task.notes}
+                                      </ThemedText>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                            </TouchableOpacity>
+
+                            {/* Priority Controls - Show when task is selected for priority adjustment */}
+                            {isSelectedForPriority && (
+                              <View style={styles.priorityControls}>
+                                <TouchableOpacity
+                                  style={[
+                                    styles.priorityButton,
+                                    currentPriority <= 1 &&
+                                      styles.disabledPriorityButton,
+                                  ]}
+                                  onPress={() => {
+                                    handlePriorityChange(
+                                      task.name,
+                                      category._id,
+                                      currentPriority - 1
+                                    );
+                                  }}
+                                  disabled={currentPriority <= 1}
+                                  activeOpacity={0.7}
+                                >
+                                  <IconSymbol
+                                    name="chevron.up"
+                                    size={18}
+                                    color={
+                                      currentPriority <= 1
+                                        ? "rgba(255, 255, 255, 0.3)"
+                                        : "white"
+                                    }
+                                  />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  style={[
+                                    styles.priorityButton,
+                                    currentPriority >= maxPriority &&
+                                      styles.disabledPriorityButton,
+                                  ]}
+                                  onPress={() => {
+                                    handlePriorityChange(
+                                      task.name,
+                                      category._id,
+                                      currentPriority + 1
+                                    );
+                                  }}
+                                  disabled={currentPriority >= maxPriority}
+                                  activeOpacity={0.7}
+                                >
+                                  <IconSymbol
+                                    name="chevron.down"
+                                    size={18}
+                                    color={
+                                      currentPriority >= maxPriority
+                                        ? "rgba(255, 255, 255, 0.3)"
+                                        : "white"
+                                    }
+                                  />
+                                </TouchableOpacity>
+                              </View>
+                            )}
+                          </View>
+                        );
+                      })}
                     </View>
                   )}
                 </TouchableOpacity>
@@ -271,7 +422,7 @@ export default function TodayScreen() {
               </ThemedText>
             )}
           </ScrollView>
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Floating Add Category Button */}
@@ -459,5 +610,32 @@ const styles = StyleSheet.create({
     textDecorationLine: "line-through",
     textDecorationStyle: "solid",
     opacity: 0.6,
+  },
+  selectedTaskItem: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  priorityControls: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 8,
+    paddingVertical: 4,
+    gap: 12,
+  },
+  priorityButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  disabledPriorityButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
 });
