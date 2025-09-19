@@ -4,6 +4,7 @@ import {
   deleteCategoryById,
   getModifiedCategories,
   toggleCategoryDone,
+  updateCategoryPriority,
 } from "dhruvtodo";
 import { useEffect, useState } from "react";
 import {
@@ -243,6 +244,90 @@ export default function CategoryDetailsModal({
     }
   };
 
+  const handleMoveUp = async () => {
+    try {
+      const currentPriority = currentCategory.priority || 1;
+      if (currentPriority <= 1) {
+        return; // Already at minimum priority
+      }
+
+      const newPriority = currentPriority - 1;
+
+      // Use updateCategoryPriority from dhruvtodo
+      const updatedCategories = updateCategoryPriority(
+        JSON.parse(JSON.stringify(categories)), // Deep copy to avoid direct state mutation
+        categoryId,
+        newPriority
+      );
+
+      // Get modified categories for API update
+      const modifiedCategories = getModifiedCategories(
+        categories,
+        updatedCategories
+      );
+
+      // Update the category data with updateVaccation
+      if (modifiedCategories.length > 0) {
+        const updateResult = await updateVaccation(modifiedCategories);
+
+        if (updateResult.error) {
+          Alert.alert("Error", updateResult.error);
+          return;
+        }
+      }
+
+      // Update categories in the index with the new data
+      onCategoriesUpdate(modifiedCategories, updatedCategories);
+
+      handleClose();
+    } catch {
+      Alert.alert("Error", "Failed to move category up");
+    }
+  };
+
+  const handleMoveDown = async () => {
+    try {
+      const currentPriority = currentCategory.priority || 1;
+      const maxPriority = categories.length;
+      
+      if (currentPriority >= maxPriority) {
+        return; // Already at maximum priority
+      }
+
+      const newPriority = currentPriority + 1;
+
+      // Use updateCategoryPriority from dhruvtodo
+      const updatedCategories = updateCategoryPriority(
+        JSON.parse(JSON.stringify(categories)), // Deep copy to avoid direct state mutation
+        categoryId,
+        newPriority
+      );
+
+      // Get modified categories for API update
+      const modifiedCategories = getModifiedCategories(
+        categories,
+        updatedCategories
+      );
+
+      // Update the category data with updateVaccation
+      if (modifiedCategories.length > 0) {
+        const updateResult = await updateVaccation(modifiedCategories);
+
+        if (updateResult.error) {
+          Alert.alert("Error", updateResult.error);
+          return;
+        }
+      }
+
+      // Update categories in the index with the new data
+      onCategoriesUpdate(modifiedCategories, updatedCategories);
+
+      handleClose();
+    } catch {
+      Alert.alert("Error", "Failed to move category down");
+    }
+  };
+
   if (!currentCategory) {
     return null;
   }
@@ -361,23 +446,45 @@ export default function CategoryDetailsModal({
 
             <View style={styles.actionButtons}>
               <TouchableOpacity
-                style={[styles.actionButton, styles.updateButton]}
-                onPress={handleUpdateCategory}
-              >
-                <IconSymbol name="arrow.clockwise" size={20} color="white" />
-                <ThemedText style={styles.actionButtonText}>
-                  Update Category
-                </ThemedText>
-              </TouchableOpacity>
-
-              <TouchableOpacity
                 style={[styles.actionButton, styles.deleteButton]}
                 onPress={handleDeleteCategory}
               >
                 <IconSymbol name="trash" size={20} color="white" />
-                <ThemedText style={styles.actionButtonText}>
-                  Delete Category
-                </ThemedText>
+                <ThemedText style={styles.actionButtonText}>Delete</ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  styles.upButton,
+                  (currentCategory.priority || 1) <= 1 && styles.disabledButton,
+                ]}
+                onPress={handleMoveUp}
+                disabled={(currentCategory.priority || 1) <= 1}
+              >
+                <IconSymbol name="chevron.up" size={20} color="white" />
+                <ThemedText style={styles.actionButtonText}>Up</ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.actionButton, 
+                  styles.downButton,
+                  (currentCategory.priority || 1) >= categories.length && styles.disabledButton
+                ]}
+                onPress={handleMoveDown}
+                disabled={(currentCategory.priority || 1) >= categories.length}
+              >
+                <IconSymbol name="chevron.down" size={20} color="white" />
+                <ThemedText style={styles.actionButtonText}>Down</ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.actionButton, styles.updateButton]}
+                onPress={handleUpdateCategory}
+              >
+                <IconSymbol name="arrow.clockwise" size={20} color="white" />
+                <ThemedText style={styles.actionButtonText}>Update</ThemedText>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -504,26 +611,39 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   actionButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 30,
     marginBottom: 30,
   },
   actionButton: {
+    flex: 1,
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 10,
+    marginHorizontal: 5,
+    flexDirection: "column",
+    gap: 5,
   },
   updateButton: {
     backgroundColor: "rgba(76, 175, 80, 0.8)",
   },
   deleteButton: {
     backgroundColor: "rgba(244, 67, 54, 0.8)",
-    marginTop: 10,
+  },
+  upButton: {
+    backgroundColor: "rgba(33, 150, 243, 0.8)",
+  },
+  downButton: {
+    backgroundColor: "rgba(255, 152, 0, 0.8)",
+  },
+  disabledButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    opacity: 0.5,
   },
   actionButtonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: "600",
   },
   strikethrough: {
