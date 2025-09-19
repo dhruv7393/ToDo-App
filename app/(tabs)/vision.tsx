@@ -24,7 +24,7 @@ const visionImages = [
     id: "1",
     name: "001Swamiji",
     source: require("../../assets/vision/001Swamiji.jpeg"),
-    height: 200,
+    height: 250,
     notes: ["Bhato kevad bramh ni murti"],
   },
   {
@@ -40,21 +40,39 @@ const visionImages = [
   },
   {
     id: "3",
+    name: "Kishanji",
+    source: require("../../assets/vision/Kishanji.jpg"),
+    height: 250,
+  },
+  {
+    id: "3",
+    name: "ChiragBhai",
+    source: require("../../assets/vision/ChiragBhai.jpg"),
+    height: 250,
+  },
+  {
+    id: "3",
+    name: "JigarBhai",
+    source: require("../../assets/vision/JigarBhai.jpg"),
+    height: 250,
+  },
+  {
+    id: "3",
+    name: "Bapa",
+    source: require("../../assets/vision/Bapa.jpg"),
+    height: 250,
+  },
+  {
+    id: "3",
     name: "003pray",
     source: require("../../assets/vision/003pray.jpeg"),
-    height: 200,
-    notes: ["Bhato kevad bramh ni murti"],
+    height: 250,
   },
   {
     id: "4",
     name: "004mind",
     source: require("../../assets/vision/004mind.jpeg"),
     height: 250,
-    notes: [
-      "Tamari Anuvritti ane Abhipray ma revai",
-      "Bhajan karta karta tara baade ahobhave seva thai",
-      "Atmiyata to che, Mithas na jai",
-    ],
   },
   {
     id: "3",
