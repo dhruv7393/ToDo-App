@@ -13,72 +13,36 @@ import { FlatGrid } from "react-native-super-grid";
 
 const { width } = Dimensions.get("window");
 
-// Array of strings to display above images
-const visionTexts = [
-  "Tane, mane, dhane, atmae, antar, kaame, family ane friends thi sukhi thavai",
-];
-
 // Image data with names sorted alphabetically
 const visionImages = [
   {
     id: "1",
     name: "001Swamiji",
     source: require("../../assets/vision/001Swamiji.jpeg"),
-    height: 250,
-    notes: ["Bhato kevad bramh ni murti"],
+    height: 220,
+    notes: [
+      "Bhato kevad bramh ni murti",
+      "Tane, mane, dhane, atmae, antar, kaame, family ane friends thi sukhi thavai",
+      "Nirbhayta, Nischinta and Shubvichar",
+    ],
   },
   {
     id: "2",
     name: "002Prabodh_Swami",
     source: require("../../assets/vision/002Prabodh_Swami.jpeg"),
-    height: 250,
+    height: 220,
     notes: [
       "Tamari Anuvritti ane Abhipray ma revai",
-      "Bhajan karta karta tara baade ahobhave seva thai",
+      "Bhajan karta karta tamara baade ahobhave seva thai",
       "Atmiyata to che, Mithas na jai",
+      "Sau khub mota che, sambandh vada che ane mare techique sikhi levi che",
     ],
-  },
-  {
-    id: "3",
-    name: "Kishanji",
-    source: require("../../assets/vision/Kishanji.jpg"),
-    height: 250,
-  },
-  {
-    id: "3",
-    name: "ChiragBhai",
-    source: require("../../assets/vision/ChiragBhai.jpg"),
-    height: 250,
-  },
-  {
-    id: "3",
-    name: "JigarBhai",
-    source: require("../../assets/vision/JigarBhai.jpg"),
-    height: 250,
-  },
-  {
-    id: "3",
-    name: "Bapa",
-    source: require("../../assets/vision/Bapa.jpg"),
-    height: 250,
-  },
-  {
-    id: "3",
-    name: "003pray",
-    source: require("../../assets/vision/003pray.jpeg"),
-    height: 250,
-  },
-  {
-    id: "4",
-    name: "004mind",
-    source: require("../../assets/vision/004mind.jpeg"),
-    height: 250,
   },
   {
     id: "3",
     name: "Dhoni",
     source: require("../../assets/vision/Dhoni.jpeg"),
-    height: 250,
+    height: 220,
     notes: [
       "Mithas na jai",
       "Sau mota che, sambandh vada che ane mare techique sikhi levi che",
@@ -88,142 +52,101 @@ const visionImages = [
     id: "4",
     name: "Sachin",
     source: require("../../assets/vision/Sachin.jpeg"),
-    height: 250,
+    height: 220,
     notes: ["Mai khelega", "Nirantar swadyay"],
   },
   {
     id: "5",
     name: "Warren",
     source: require("../../assets/vision/warren.jpeg"),
-    height: 250,
+    height: 220,
     notes: ["Financially independent - 1.5M 750K Investment 22%PF/A"],
+  },
+  {
+    id: "4",
+    name: "004mind",
+    source: require("../../assets/vision/004mind.jpeg"),
+    height: 220,
   },
   {
     id: "6",
     name: "005 Looks",
     source: require("../../assets/vision/005 Looks.jpeg"),
-    height: 190,
+    height: 220,
   },
   {
     id: "7",
     name: "006 Looks",
     source: require("../../assets/vision/006 Looks.jpeg"),
-    height: 240,
+    height: 220,
   },
   {
     id: "8",
     name: "007 Looks",
     source: require("../../assets/vision/007 Looks.jpeg"),
-    height: 210,
+    height: 220,
   },
-  {
-    id: "8",
-    name: "Family3",
-    source: require("../../assets/vision/Family3.jpg"),
-    height: 210,
-  },
-  {
-    id: "8",
-    name: "Family2",
-    source: require("../../assets/vision/Family2.jpg"),
-    height: 210,
-  },
-  {
-    id: "7",
-    name: "Family1",
-    source: require("../../assets/vision/Family1.jpg"),
-    height: 240,
-  },
-  {
-    id: "8",
-    name: "Family4",
-    source: require("../../assets/vision/Family4.jpg"),
-    height: 210,
-  },
-  {
-    id: "8",
-    name: "Family5",
-    source: require("../../assets/vision/Family5.jpg"),
-    height: 210,
-  },
-  {
-    id: "7",
-    name: "Friends1",
-    source: require("../../assets/vision/Friends1.jpg"),
-    height: 240,
-  },
-  {
-    id: "8",
-    name: "Friends2",
-    source: require("../../assets/vision/Friends2.jpg"),
-    height: 210,
-  },
-  {
-    id: "8",
-    name: "Friends3",
-    source: require("../../assets/vision/Friends3.jpg"),
-    height: 210,
-  },
+
   {
     id: "7",
     name: "Home1",
     source: require("../../assets/vision/Home1.jpeg"),
-    height: 240,
+    height: 220,
   },
   {
     id: "8",
     name: "Home2",
     source: require("../../assets/vision/Home2.jpeg"),
-    height: 210,
+    height: 220,
   },
   {
     id: "8",
     name: "Home3",
     source: require("../../assets/vision/Home3.jpeg"),
-    height: 210,
+    height: 220,
   },
   {
     id: "7",
     name: "Farm1",
     source: require("../../assets/vision/Farm1.jpeg"),
-    height: 240,
+    height: 220,
     notes: ["50 Acers nu farmland"],
   },
   {
     id: "8",
     name: "Farm2",
     source: require("../../assets/vision/Farm2.jpeg"),
-    height: 210,
+    height: 220,
   },
   {
     id: "8",
     name: "Farm3",
     source: require("../../assets/vision/Farm3.jpeg"),
-    height: 210,
+    height: 220,
   },
   {
     id: "7",
     name: "Work3",
     source: require("../../assets/vision/Work3.jpeg"),
-    height: 240,
+    height: 220,
   },
   {
     id: "8",
     name: "Work2",
     source: require("../../assets/vision/Work2.jpeg"),
-    height: 210,
+    height: 220,
   },
   {
     id: "8",
     name: "Work1",
     source: require("../../assets/vision/Work1.jpeg"),
-    height: 210,
+    height: 220,
   },
   {
     id: "6",
     name: "003Bhutan",
     source: require("../../assets/vision/003Bhutan.jpeg"),
-    height: 180,
+    height: 220,
   },
   {
     id: "7",
@@ -236,6 +159,12 @@ const visionImages = [
     name: "Thought1",
     source: require("../../assets/vision/Thought1.jpeg"),
     height: 220,
+    notes: [
+      "O Heavenly Father, make me better. Change my attitude, my approach, my mind and my reactions.",
+      "Heavenly Father, if I'm chasing the wrong things, please redirect me.",
+      "Dear God, please bring me closer to what's meant for me.",
+      "O Heavenly Father, please make my days useful, my night restful, my home peaceful and my efforts fruitful.",
+    ],
   },
   {
     id: "9",
@@ -272,16 +201,6 @@ export default function VisionScreen() {
     </TouchableOpacity>
   );
 
-  const renderHeader = () => (
-    <View style={styles.textListContainer}>
-      {visionTexts.map((text, index) => (
-        <Text key={index} style={styles.visionText}>
-          • {text}
-        </Text>
-      ))}
-    </View>
-  );
-
   return (
     <ImageBackground
       source={require("../../assets/images/Nishan.jpeg")}
@@ -300,7 +219,6 @@ export default function VisionScreen() {
             fixed={false}
             maxItemsPerRow={2}
             showsVerticalScrollIndicator={false}
-            ListHeaderComponent={renderHeader}
           />
         </View>
       </View>
@@ -349,18 +267,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingTop: 50, // 30px + 20px for extra spacing
-  },
-  textListContainer: {
-    paddingHorizontal: 15,
-    paddingBottom: 20,
-    marginHorizontal: 10,
-    marginBottom: 15,
-  },
-  visionText: {
-    fontSize: 16,
-    color: "#fff",
-    paddingVertical: 5,
-    fontWeight: "500",
   },
   grid: {
     flex: 1,
